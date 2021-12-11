@@ -14,6 +14,11 @@ export class RecipeListComponent implements OnInit {
       'This is simply a test',
       'https://cdn.loveandlemons.com/wp-content/uploads/2020/03/pantry-recipes-2.jpg'
     ),
+    new Recipe(
+      'This Is Another Recipe',
+      'Testing again with another recipe',
+      'https://www.saveur.com/uploads/2020/11/20/Y7RZPFZEERAZVHJ2VHC2RXMEEY.jpg?quality=85&width=540'
+    ),
   ];
 
   constructor() { }
