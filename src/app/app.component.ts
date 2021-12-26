@@ -7,4 +7,10 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'ng4-complete-guide';
+
+  selectedRecipes = false;
+
+  onNavigate(feature: string) {
+    this.selectedRecipes = feature === 'recipes';
+  }
 }
