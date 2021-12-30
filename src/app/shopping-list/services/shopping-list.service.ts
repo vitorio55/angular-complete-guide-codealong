@@ -20,6 +20,12 @@ export class ShoppingListService {
     this.ingredientsChanged.emit(this.getIngredients());
   }
 
+  addAllIngredients(newIngredients: Ingredient[]) {
+    // We have an addAll method to avoid triggering a lot of emitted events (see addIngredient)
+    this.ingredients.push(...newIngredients);
+    this.ingredientsChanged.emit(this.getIngredients());
+  }
+
   getIngredients() {
     return this.ingredients.slice();
   }
