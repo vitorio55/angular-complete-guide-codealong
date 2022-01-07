@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 import { Ingredient } from 'src/app/shared/ingredient.model';
 
@@ -6,7 +6,7 @@ import { Ingredient } from 'src/app/shared/ingredient.model';
 //   providedIn: 'root'
 // })
 export class ShoppingListService {
-  ingredientsChanged = new EventEmitter<Ingredient[]>();
+  ingredientsChanged = new Subject<Ingredient[]>();
 
   private ingredients: Ingredient[] = [
     new Ingredient('Apples', 5),
@@ -17,13 +17,13 @@ export class ShoppingListService {
 
   addIngredient(newIngredient: Ingredient) {
     this.ingredients.push(newIngredient);
-    this.ingredientsChanged.emit(this.getIngredients());
+    this.ingredientsChanged.next(this.getIngredients());
   }
 
   addAllIngredients(newIngredients: Ingredient[]) {
     // We have an addAll method to avoid triggering a lot of emitted events (see addIngredient)
     this.ingredients.push(...newIngredients);
-    this.ingredientsChanged.emit(this.getIngredients());
+    this.ingredientsChanged.next(this.getIngredients());
   }
 
   getIngredients() {
