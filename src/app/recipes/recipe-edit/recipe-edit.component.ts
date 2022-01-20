@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
+// import { Ingredient } from 'src/app/shared/ingredient.model';
+// import { Recipe } from '../recipe.model';
 
 import { RecipeService } from '../services/recipe.service';
 
@@ -34,7 +36,46 @@ export class RecipeEditComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.recipeForm);
+    // ------------ First solution --> Thats worst
+    // const ingredients = [];
+    // const recipeData = new Recipe(
+    //   this.recipeForm.controls.name.value,
+    //   this.recipeForm.controls.description.value,
+    //   ingredients,
+    //   this.recipeForm.controls.imagePath.value,
+    // );
+
+    // const ingredientsControls = (this.recipeForm.get('ingredients') as FormArray).controls;
+    // for (let igControl of ingredientsControls) {
+    //   ingredients.push(new Ingredient(
+    //     igControl.get('name').value,
+    //     igControl.get('amount').value,
+    //   ));
+    // }
+
+    // ------------ Second solution --> Thats better but not great
+    // const recipeData = new Recipe(
+    //   this.recipeForm.value['name'],
+    //   this.recipeForm.value['description'],
+    //   this.recipeForm.value['ingredients'],
+    //   this.recipeForm.value['imagePath'],
+    // );
+
+    // (for first and second solution)
+    // if (this.editMode) {
+    //   this.recipeService.updateRecipe(this.id, recipeData);
+    // } else {
+    //   this.recipeService.addRecipe(recipeData);
+    // }
+
+    // ------------ Third solution --> Great!!!
+    // Since our form has the exact same fields of the Recipe structure, we can pass
+    // directly the form value like below. The code above becomes unnecessary.
+    if (this.editMode) {
+      this.recipeService.updateRecipe(this.id, this.recipeForm.value);
+    } else {
+      this.recipeService.addRecipe(this.recipeForm.value);
+    }
   }
 
   onAddIngredient() {
