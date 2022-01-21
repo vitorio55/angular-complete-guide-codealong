@@ -7,3 +7,7 @@ textarea.ng-invalid.ng-touched {
   border: 1px solid red;
   background-color: rgba(255, 0, 170, 0.034);
 }
+
+img {
+  max-width: 100px;
+}
