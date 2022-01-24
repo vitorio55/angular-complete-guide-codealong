@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { map } from 'rxjs/operators';
+
 import { RecipeService } from '../recipes/services/recipe.service';
 import { Recipe } from '../recipes/recipe.model';
+import { RecipesComponent } from '../recipes/recipes.component';
+import { Ingredient } from './ingredient.model';
 
 @Injectable({
   providedIn: 'root',
@@ -29,6 +33,14 @@ export class DataStorageService {
   fetchRecipes() {
     this.http
       .get<Recipe[]>(this.endopoint)
+      .pipe(map(recipes => {
+        return recipes.map(recipe => {
+          return {
+            ...recipe,
+            ingredients: recipe.ingredients ? recipe.ingredients : []
+          } as Recipe;
+        });
+      }))
       .subscribe(recipes => {
         console.log(recipes);
         this.recipeService.updateRecipes(recipes);
