@@ -50,6 +50,11 @@ export class RecipeService {
     this.recipesChanged.next(this.recipes.slice());
   }
 
+  updateRecipes(recipe: Recipe[]) {
+    this.recipes = recipe;
+    this.recipesChanged.next(this.recipes.slice());
+  }
+
   deleteRecipe(index: number) {
     if (index < 0 || index > this.recipes.length) {
       return;
