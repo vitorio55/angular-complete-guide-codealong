@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
 
 import { finalize } from 'rxjs/operators';
 
+import { AuthResponseData } from './auth-response-data.model';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -37,23 +39,25 @@ export class AuthComponent implements OnInit {
 
     this.isLoading = true;
 
-    if (this.isLoginMode) {
-      // ...
-    } else {
-      this.authService
-      .signup(email, password)
-      .pipe(
-        finalize(() => this.isLoading = false),
-      )
-      .subscribe(responseData => {
-        console.log(responseData);
-      },
-      errorMessage => {
-        this.error = errorMessage;
-        console.log(errorMessage);
-      });
-    }
+    const authObservable = this.isLoginMode
+      ? this.authService.login(email, password)
+      : this.authService.signup(email, password);
+
+    this.handleAuthObservable(authObservable);
 
     this.authForm.reset();
+  }
+
+  private handleAuthObservable(obs: Observable<AuthResponseData>) {
+    obs.pipe(
+      finalize(() => this.isLoading = false),
+    )
+    .subscribe(responseData => {
+      console.log(responseData);
+    },
+    errorMessage => {
+      this.error = errorMessage;
+      console.log(errorMessage);
+    });
   }
 }
