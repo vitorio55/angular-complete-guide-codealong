@@ -15,6 +15,8 @@ export class AuthComponent implements OnInit {
   authForm: FormGroup;
   isLoginMode = true;
   isLoading = false;
+
+  success = false;
   error: string = null;
 
   constructor(private authService: AuthService) {}
@@ -43,6 +45,8 @@ export class AuthComponent implements OnInit {
       ? this.authService.login(email, password)
       : this.authService.signup(email, password);
 
+    this.error = null;
+    this.success = false;
     this.handleAuthObservable(authObservable);
 
     this.authForm.reset();
@@ -50,7 +54,10 @@ export class AuthComponent implements OnInit {
 
   private handleAuthObservable(obs: Observable<AuthResponseData>) {
     obs.pipe(
-      finalize(() => this.isLoading = false),
+      finalize(() => {
+        this.isLoading = false;
+        this.success = this.error ? false : true;
+      }),
     )
     .subscribe(responseData => {
       console.log(responseData);
