@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
-import { map, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { exhaustMap, map, take, tap } from 'rxjs/operators';
 
 import { RecipeService } from '../recipes/services/recipe.service';
 import { Recipe } from '../recipes/recipe.model';
-import { Observable } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +15,8 @@ export class DataStorageService {
   readonly endopoint = 'https://ng-complete-guide-2b67f-default-rtdb.firebaseio.com/recipes.json';
 
   constructor(private http: HttpClient,
-    private recipeService: RecipeService) {
+              private recipeService: RecipeService,
+              private authService: AuthService) {
   }
 
   storeRecipes() {
@@ -28,9 +30,18 @@ export class DataStorageService {
   }
 
   fetchRecipes(): Observable<Recipe[]> {
-    return this.http
-      .get<Recipe[]>(this.endopoint)
+    return this.authService.userSubject
       .pipe(
+        take(1), // Takes one user from user subject
+        exhaustMap(user => { // ... then replaces the previous observable with a new one
+          return this.http.get<Recipe[]>(
+            this.endopoint,
+            {
+              // Adds ?auth= query param
+              params: new HttpParams().set('auth', user.token),
+            }
+          );
+        }),
         map(recipes => {
           return recipes.map(recipe => {
             return {
@@ -43,5 +54,5 @@ export class DataStorageService {
           this.recipeService.updateRecipes(recipes);
         })
       );
-  }
+    }
 }
