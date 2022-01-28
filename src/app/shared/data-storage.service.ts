@@ -13,8 +13,6 @@ import { Observable } from 'rxjs';
 export class DataStorageService {
   readonly endopoint = 'https://ng-complete-guide-2b67f-default-rtdb.firebaseio.com/recipes.json';
 
-
-
   constructor(private http: HttpClient,
     private recipeService: RecipeService) {
   }
