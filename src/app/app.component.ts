@@ -1,15 +1,16 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
-  title = 'ng4-complete-guide';
+export class AppComponent implements OnInit {
+  constructor(private authService: AuthService) {}
 
-  selectedRecipes = false;
-
-  constructor(private router: Router) {}
+  ngOnInit() {
+    console.log('AppComponent executing autoLogin');
+    this.authService.autoLogin();
+  }
 }

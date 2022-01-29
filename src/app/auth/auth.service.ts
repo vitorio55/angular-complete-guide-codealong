@@ -31,8 +31,32 @@ export class AuthService {
     return this.doPost(url, email, password);
   }
 
+  autoLogin() {
+    const userData: {
+      email: string,
+      id: string,
+      _token: string,
+      _tokenExpirationDate: string;
+    } = JSON.parse(localStorage.getItem('userData'));
+    if (!userData) {
+      return;
+    }
+
+    const storedUser = new User(
+      userData.email,
+      userData.id,
+      userData._token,
+      new Date(userData._tokenExpirationDate),
+    );
+
+    if (storedUser.token) {
+      this.userSubject.next(storedUser);
+    }
+  }
+
   logout() {
     this.userSubject.next(null);
+    localStorage.removeItem('userData');
     this.router.navigate(['/auth']);
   }
 
@@ -67,6 +91,8 @@ export class AuthService {
       expirationDate,
     );
     this.userSubject.next(user);
+    localStorage.setItem('userData', JSON.stringify(user));
+    console.log(JSON.stringify(user));
   }
 
   private handleError(errorResponse: HttpErrorResponse) {
