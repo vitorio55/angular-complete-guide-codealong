@@ -1,5 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -17,7 +18,8 @@ export class AuthService {
   readonly apiLoginUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]';
   readonly projectApiKey = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,
+              private router: Router) {}
 
   signup(email: string, password: string): Observable<AuthResponseData> {
     const url = this.apiSignUpUrl.replace('[API_KEY]', this.projectApiKey);
@@ -27,6 +29,11 @@ export class AuthService {
   login(email: string, password: string): Observable<AuthResponseData> {
     const url = this.apiLoginUrl.replace('[API_KEY]', this.projectApiKey);
     return this.doPost(url, email, password);
+  }
+
+  logout() {
+    this.userSubject.next(null);
+    this.router.navigate(['/auth']);
   }
 
   private doPost(url: string, email: string, password: string): Observable<AuthResponseData> {
