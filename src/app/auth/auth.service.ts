@@ -18,6 +18,8 @@ export class AuthService {
   readonly apiLoginUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]';
   readonly projectApiKey = '';
 
+  private tokenExpirationTimer: any;
+
   constructor(private http: HttpClient,
               private router: Router) {}
 
@@ -51,13 +53,30 @@ export class AuthService {
 
     if (storedUser.token) {
       this.userSubject.next(storedUser);
+      const expirationDuration =
+        new Date(userData._tokenExpirationDate).getTime() -
+        new Date().getTime();
+      this.autoLogout(expirationDuration);
     }
   }
 
   logout() {
     this.userSubject.next(null);
     localStorage.removeItem('userData');
+
+    if (this.tokenExpirationTimer) {
+      clearTimeout(this.tokenExpirationTimer);
+    }
+
+    this.tokenExpirationTimer = null;
     this.router.navigate(['/auth']);
+  }
+
+  autoLogout(expirationDuration: number) {
+    console.log(`User session expires in (ms): ${ expirationDuration }`);
+    this.tokenExpirationTimer = setTimeout(() => {
+      this.logout();
+    }, expirationDuration);
   }
 
   private doPost(url: string, email: string, password: string): Observable<AuthResponseData> {
@@ -91,6 +110,7 @@ export class AuthService {
       expirationDate,
     );
     this.userSubject.next(user);
+    this.autoLogout(expiresIn * 1000);
     localStorage.setItem('userData', JSON.stringify(user));
     console.log(JSON.stringify(user));
   }
