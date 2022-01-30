@@ -1,10 +1,16 @@
-import { Component, ComponentFactoryResolver, OnInit } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { AlertComponent } from '../shared/alert/alert.component';
+import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
 
 import { AuthResponseData } from './auth-response-data.model';
 import { AuthService } from './auth.service';
@@ -20,6 +26,9 @@ export class AuthComponent implements OnInit {
 
   success = false;
   error: string = null;
+
+  @ViewChild(PlaceholderDirective, { static: false })
+  alertHost: PlaceholderDirective;
 
   constructor(
     private authService: AuthService,
@@ -69,6 +78,10 @@ export class AuthComponent implements OnInit {
     // Programmatic component error modal approach
     const alertComponentFactory =
       this.componentFactoryResolver.resolveComponentFactory(AlertComponent);
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+
+    hostViewContainerRef.createComponent(alertComponentFactory);
   }
 
   private handleAuthObservable(obs: Observable<AuthResponseData>) {

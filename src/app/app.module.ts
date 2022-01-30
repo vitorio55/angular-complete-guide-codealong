@@ -55,6 +55,9 @@ import { PlaceholderDirective } from './shared/placeholder/placeholder.directive
       multi: true,
     },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [ // Only required pre Angular 9
+    AlertComponent,
+  ],
 })
 export class AppModule { }
