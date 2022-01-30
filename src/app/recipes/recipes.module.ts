@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { RecipeDetailComponent } from './recipe-detail/recipe-detail.component';
@@ -16,6 +18,14 @@ import { RecipesComponent } from './recipes.component';
     RecipeItemComponent,
     RecipeStartComponent,
     RecipeEditComponent,
+  ],
+  imports: [
+    RouterModule,
+    // We would import the BrowserModule, however BrowserModule does also
+    // the application startup and must only run once. Therefore we must use here
+    // the CommomModule
+    CommonModule,
+    ReactiveFormsModule,
   ],
   exports: [
     RecipesComponent,
