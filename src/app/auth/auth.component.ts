@@ -8,10 +8,10 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Observable } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, take } from 'rxjs/operators';
+
 import { AlertComponent } from '../shared/alert/alert.component';
 import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
-
 import { AuthResponseData } from './auth-response-data.model';
 import { AuthService } from './auth.service';
 
@@ -81,7 +81,17 @@ export class AuthComponent implements OnInit {
     const hostViewContainerRef = this.alertHost.viewContainerRef;
     hostViewContainerRef.clear();
 
-    hostViewContainerRef.createComponent(alertComponentFactory);
+    const componentRef = hostViewContainerRef.createComponent(
+      alertComponentFactory
+    );
+    componentRef.instance.message = message;
+    componentRef.instance.close
+      .pipe(
+        take(1),
+      )
+      .subscribe(() => {
+        hostViewContainerRef.clear();
+      });
   }
 
   private handleAuthObservable(obs: Observable<AuthResponseData>) {
