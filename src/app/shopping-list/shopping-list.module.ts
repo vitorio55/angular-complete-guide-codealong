@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from '../shared/shared.module';
 
-import { ShoppingListService } from './services/shopping-list.service';
 import { ShoppingEditComponent } from './shopping-edit/shopping-edit.component';
 import { ShoppingListComponent } from './shopping-list.component';
 
@@ -16,6 +15,5 @@ import { ShoppingListComponent } from './shopping-list.component';
     ]),
     SharedModule,
   ],
-  providers: [ShoppingListService],
 })
 export class ShoppingListModule {}

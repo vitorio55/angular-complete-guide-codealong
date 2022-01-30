@@ -9,7 +9,7 @@ import { AuthResponseData } from './auth-response-data.model';
 import { User } from './user.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   userSubject = new BehaviorSubject<User>(null);
