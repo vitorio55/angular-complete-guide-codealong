@@ -3,10 +3,20 @@ import { Routes, RouterModule } from '@angular/router';
 
 const routes: Routes = [
   { path: '', redirectTo: '/recipes', pathMatch: 'full' },
+
+  // Lazy-loading old syntax
+  // { path: 'recipes', loadChildren: './recipes/recipes.module#RecipesModule' },
+
+  {
+    // Lazy-loading newer syntax
+    path: 'recipes',
+    loadChildren: () =>
+      import('./recipes/recipes.module').then((m) => m.RecipesModule),
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}
