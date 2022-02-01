@@ -7,6 +7,7 @@ import { catchError, tap } from 'rxjs/operators';
 
 import { AuthResponseData } from './auth-response-data.model';
 import { User } from './user.model';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,6 @@ export class AuthService {
 
   readonly apiSignUpUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]';
   readonly apiLoginUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]';
-  readonly projectApiKey = '';
 
   private tokenExpirationTimer: any;
 
@@ -24,12 +24,12 @@ export class AuthService {
               private router: Router) {}
 
   signup(email: string, password: string): Observable<AuthResponseData> {
-    const url = this.apiSignUpUrl.replace('[API_KEY]', this.projectApiKey);
+    const url = this.apiSignUpUrl.replace('[API_KEY]', environment.firebaseAPIKey);
     return this.doPost(url, email, password);
   }
 
   login(email: string, password: string): Observable<AuthResponseData> {
-    const url = this.apiLoginUrl.replace('[API_KEY]', this.projectApiKey);
+    const url = this.apiLoginUrl.replace('[API_KEY]', environment.firebaseAPIKey);
     return this.doPost(url, email, password);
   }
 
