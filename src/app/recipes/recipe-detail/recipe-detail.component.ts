@@ -1,43 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+
+import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
-import { ShoppingListService } from 'src/app/shopping-list/services/shopping-list.service';
+import { Ingredient } from 'src/app/shared/ingredient.model';
 import { Recipe } from '../recipe.model';
 import { RecipeService } from '../services/recipe.service';
+import * as ShoppingListActions from '../../shopping-list/store/shopping-list.actions';
 
 @Component({
   selector: 'app-recipe-detail',
   templateUrl: './recipe-detail.component.html',
-  styleUrls: ['./recipe-detail.component.css']
+  styleUrls: ['./recipe-detail.component.css'],
 })
 export class RecipeDetailComponent implements OnInit {
   recipesChangSubscription: Subscription;
   recipe: Recipe;
   index: number;
 
-  constructor(private recipeService: RecipeService,
-              private shoppingListService: ShoppingListService,
-              private route: ActivatedRoute,
-              private router: Router) {
-  }
+  constructor(
+    private recipeService: RecipeService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private store: Store<{ shoppingList: { ingredients: Ingredient[] } }>
+  ) {}
 
   ngOnInit() {
-    this.route.params
-      .subscribe(
-        (params: Params) => {
-          this.index = +params['id'];
-          this.recipe = this.recipeService.getRecipe(this.index);
-        }
-      );
+    this.route.params.subscribe((params: Params) => {
+      this.index = +params['id'];
+      this.recipe = this.recipeService.getRecipe(this.index);
+    });
   }
 
   onAddIngredientsToShoppingList() {
-    // This emits events in a loop, not good!
-    // this.recipe.ingredients.forEach((ingredient) => {
-    //   this.shoppingListService.addIngredient(ingredient);
-    // });
-    this.shoppingListService.addAllIngredients(this.recipe.ingredients);
+    this.store.dispatch(
+      new ShoppingListActions.AddIngredients(this.recipe.ingredients),
+    );
   }
 
   onDeleteRecipe() {
