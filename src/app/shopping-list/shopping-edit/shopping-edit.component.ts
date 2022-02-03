@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { Ingredient } from 'src/app/shared/ingredient.model';
@@ -17,15 +18,15 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   @ViewChild('f', { static: true }) shoppingListForm: NgForm;
 
   editMode = false;
-  editedItemIndex: number;
   editedItem: Ingredient;
+
+  private subscription: Subscription;
 
   constructor(private store: Store<fromShoppingList.AppState>) {}
 
   ngOnInit() {
-    this.store
+    this.subscription = this.store
       .select('shoppingList')
-      .pipe(take(1))
       .subscribe((stateData: fromShoppingList.State) => {
         if (stateData.editedIngredientIndex > -1) {
           this.editMode = true;
@@ -41,21 +42,19 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.subscription.unsubscribe();
     this.store.dispatch(new ShoppingListActions.StopEdit());
   }
 
   onSubmit(form: NgForm) {
     const value = form.value;
-    const ingredient = new Ingredient(value.name, value.amount);
+    const newIngredient = new Ingredient(value.name, value.amount);
     if (this.editMode) {
       this.store.dispatch(
-        new ShoppingListActions.UpdateIngredient({
-          index: this.editedItemIndex,
-          ingredient,
-        })
+        new ShoppingListActions.UpdateIngredient(newIngredient)
       );
     } else {
-      this.store.dispatch(new ShoppingListActions.AddIngredient(ingredient));
+      this.store.dispatch(new ShoppingListActions.AddIngredient(newIngredient));
     }
     this.onClear();
   }
@@ -67,9 +66,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   }
 
   onDelete() {
-    this.store.dispatch(
-      new ShoppingListActions.DeleteIngredient({ index: this.editedItemIndex })
-    );
+    this.store.dispatch(new ShoppingListActions.DeleteIngredient());
     this.onClear();
   }
 }
