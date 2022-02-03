@@ -2,6 +2,11 @@ import { Subject } from 'rxjs';
 
 import { Ingredient } from 'src/app/shared/ingredient.model';
 
+/**
+ * THIS SERVICE IS DEPRECATED!!
+ * Use store for shopping-list interactions
+ */
+
 // @Injectable({
 //   providedIn: 'root'
 // })
