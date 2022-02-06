@@ -1,11 +1,42 @@
-import { Actions, ofType } from '@ngrx/effects';
+import { HttpClient } from '@angular/common/http';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
+import { environment } from 'src/environments/environment';
+import { AuthResponseData } from '../auth-response-data.model';
 import * as AuthActions from './auth.actions';
 
 export class AuthEffects {
+  readonly apiSignUpUrl =
+    'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]';
+  readonly apiLoginUrl =
+    'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]';
+
+  @Effect()
   authLogin = this.actions$.pipe(
-    ofType(AuthActions.LOGIN_START)
+    ofType(AuthActions.LOGIN_START),
+    switchMap((authData: AuthActions.LoginStart) => {
+      const url = this.apiSignUpUrl.replace(
+        '[API_KEY]',
+        environment.firebaseAPIKey
+      );
+      return this.http
+        .post<AuthResponseData>(url, {
+          email: authData.payload.email,
+          password: authData.payload.password,
+          returnSecureToken: true,
+        })
+        .pipe(
+          catchError((error) => {
+            of();
+          }),
+          map((resData) => {
+            of();
+          })
+        );
+    })
   );
 
-  constructor(private actions$: Actions) {}
+  constructor(private actions$: Actions, private http: HttpClient) {}
 }
