@@ -8,12 +8,15 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Observable } from 'rxjs';
-import { finalize, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 
 import { AlertComponent } from '../shared/alert/alert.component';
 import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
 import { AuthResponseData } from './auth-response-data.model';
 import { AuthService } from './auth.service';
+import * as fromApp from '../store/app.reducer';
+import * as AuthActions from '../auth/store/auth.actions';
 
 @Component({
   selector: 'app-auth',
@@ -33,7 +36,8 @@ export class AuthComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private componentFactoryResolver: ComponentFactoryResolver
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private store: Store<fromApp.AppState>,
   ) {}
 
   ngOnInit() {
@@ -43,6 +47,11 @@ export class AuthComponent implements OnInit {
         Validators.required,
         Validators.minLength(6),
       ]),
+    });
+
+    this.store.select('auth').subscribe(authState => {
+      this.isLoading = authState.loading;
+      this.error = authState.authError;
     });
   }
 
@@ -59,15 +68,19 @@ export class AuthComponent implements OnInit {
 
     this.isLoading = true;
 
-    const authObservable = this.isLoginMode
-      ? this.authService.login(email, password)
-      : this.authService.signup(email, password);
+    let authObservable: Observable<AuthResponseData>;
 
-    this.error = null;
-    this.success = false;
-    this.handleAuthObservable(authObservable);
+    if (this.isLoginMode) {
+      this.store.dispatch(new AuthActions.LoginStart({ email, password }));
+    } else {
+      authObservable = this.authService.signup(email, password);
+    }
 
-    this.authForm.reset();
+    // this.error = null;
+    // this.success = false;
+    // this.handleAuthObservable(authObservable);
+
+    // this.authForm.reset();
   }
 
   onHandleError() {
@@ -94,24 +107,24 @@ export class AuthComponent implements OnInit {
       });
   }
 
-  private handleAuthObservable(obs: Observable<AuthResponseData>) {
-    obs
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-          this.success = this.error ? false : true;
-        })
-      )
-      .subscribe(
-        (responseData) => {
-          console.log(responseData);
-          this.router.navigate(['/recipes']);
-        },
-        (errorMessage) => {
-          this.error = errorMessage;
-          this.showErrorAlert(errorMessage);
-          console.log(errorMessage);
-        }
-      );
-  }
+  // private handleAuthObservable(obs: Observable<AuthResponseData>) {
+  //   obs
+  //     .pipe(
+  //       finalize(() => {
+  //         this.isLoading = false;
+  //         this.success = this.error ? false : true;
+  //       })
+  //     )
+  //     .subscribe(
+  //       (responseData) => {
+  //         console.log(responseData);
+  //         this.router.navigate(['/recipes']);
+  //       },
+  //       (errorMessage) => {
+  //         this.error = errorMessage;
+  //         this.showErrorAlert(errorMessage);
+  //         console.log(errorMessage);
+  //       }
+  //     );
+  // }
 }
