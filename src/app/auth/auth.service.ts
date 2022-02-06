@@ -16,8 +16,6 @@ import * as AuthActions from '../auth/store/auth.actions';
   providedIn: 'root',
 })
 export class AuthService {
-  // userSubject = new BehaviorSubject<User>(null);
-
   readonly apiSignUpUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]';
   readonly apiLoginUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]';
 
@@ -29,11 +27,6 @@ export class AuthService {
 
   signup(email: string, password: string): Observable<AuthResponseData> {
     const url = this.apiSignUpUrl.replace('[API_KEY]', environment.firebaseAPIKey);
-    return this.doPost(url, email, password);
-  }
-
-  login(email: string, password: string): Observable<AuthResponseData> {
-    const url = this.apiLoginUrl.replace('[API_KEY]', environment.firebaseAPIKey);
     return this.doPost(url, email, password);
   }
 
@@ -56,7 +49,6 @@ export class AuthService {
     );
 
     if (storedUser.token) {
-      // this.userSubject.next(storedUser);
       this.store.dispatch(new AuthActions.Login({
         email: userData.email,
         userId: userData.id,
@@ -71,7 +63,6 @@ export class AuthService {
   }
 
   logout() {
-    // this.userSubject.next(null);
     this.store.dispatch(new AuthActions.Logout());
     localStorage.removeItem('userData');
 
@@ -120,7 +111,6 @@ export class AuthService {
       token,
       expirationDate,
     );
-    // this.userSubject.next(user);
     this.store.dispatch(new AuthActions.Login({
       email: user.email,
       userId: user.id,

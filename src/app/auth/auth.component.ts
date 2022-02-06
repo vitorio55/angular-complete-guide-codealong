@@ -5,7 +5,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -35,7 +34,6 @@ export class AuthComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router,
     private componentFactoryResolver: ComponentFactoryResolver,
     private store: Store<fromApp.AppState>,
   ) {}
@@ -52,6 +50,9 @@ export class AuthComponent implements OnInit {
     this.store.select('auth').subscribe(authState => {
       this.isLoading = authState.loading;
       this.error = authState.authError;
+      if (this.error) {
+        this.showErrorAlert(this.error);
+      }
     });
   }
 
@@ -75,12 +76,6 @@ export class AuthComponent implements OnInit {
     } else {
       authObservable = this.authService.signup(email, password);
     }
-
-    // this.error = null;
-    // this.success = false;
-    // this.handleAuthObservable(authObservable);
-
-    // this.authForm.reset();
   }
 
   onHandleError() {
@@ -106,25 +101,4 @@ export class AuthComponent implements OnInit {
         hostViewContainerRef.clear();
       });
   }
-
-  // private handleAuthObservable(obs: Observable<AuthResponseData>) {
-  //   obs
-  //     .pipe(
-  //       finalize(() => {
-  //         this.isLoading = false;
-  //         this.success = this.error ? false : true;
-  //       })
-  //     )
-  //     .subscribe(
-  //       (responseData) => {
-  //         console.log(responseData);
-  //         this.router.navigate(['/recipes']);
-  //       },
-  //       (errorMessage) => {
-  //         this.error = errorMessage;
-  //         this.showErrorAlert(errorMessage);
-  //         console.log(errorMessage);
-  //       }
-  //     );
-  // }
 }

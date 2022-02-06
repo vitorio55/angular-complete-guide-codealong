@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 import { environment } from 'src/environments/environment';
 import { AuthResponseData } from '../auth-response-data.model';
@@ -35,21 +36,51 @@ export class AuthEffects {
             const expirationDate = new Date(
               new Date().getTime() + +resData.expiresIn * 1000
             );
-            return of(
-              new AuthActions.Login({
-                email: resData.email,
-                userId: resData.localId,
-                token: resData.idToken,
-                expirationDate: expirationDate,
-              })
-            );
+            return new AuthActions.Login({
+              email: resData.email,
+              userId: resData.localId,
+              token: resData.idToken,
+              expirationDate: expirationDate,
+            });
           }),
           catchError((error) => {
-            return of();
+            let errorMessage = 'An unknown error occurred!';
+            if (!error?.error?.error?.message) {
+              return of(new AuthActions.LoginFail(errorMessage));
+            }
+            switch (error.error.error.message.split(':')[0].trim()) {
+              case 'EMAIL_EXISTS':
+                errorMessage = 'The email is unavailable.';
+                break;
+              case 'EMAIL_NOT_FOUND':
+                errorMessage = 'Email not found.';
+                break;
+              case 'INVALID_PASSWORD':
+                errorMessage = 'Wrong e-mail or password. Please try again.';
+                break;
+              case 'TOO_MANY_ATTEMPTS_TRY_LATER':
+                errorMessage =
+                  'Access to this account has been temporarily disabled due to many failed login attempts. \
+                  You can immediately restore it by resetting your password or you can try again later.';
+                break;
+            }
+            return of(new AuthActions.LoginFail(errorMessage));
           })
         );
     })
   );
 
-  constructor(private actions$: Actions, private http: HttpClient) {}
+  @Effect({ dispatch: false })
+  authSuccess = this.actions$.pipe(
+    ofType(AuthActions.LOGIN),
+    tap(() => {
+      this.router.navigate(['/']);
+    })
+  );
+
+  constructor(
+    private actions$: Actions,
+    private http: HttpClient,
+    private router: Router
+  ) {}
 }
