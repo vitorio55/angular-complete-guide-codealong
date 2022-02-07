@@ -9,6 +9,7 @@ import { Action } from '@ngrx/store';
 import { environment } from 'src/environments/environment';
 import { AuthResponseData } from '../auth-response-data.model';
 import { handleAuthentication, handleError } from './auth.utils';
+import { User } from '../user.model';
 import * as AuthActions from './auth.actions';
 
 @Injectable()
@@ -59,6 +60,52 @@ export class AuthEffects {
     ofType(AuthActions.AUTHENTICATE_SUCCESS, AuthActions.LOGOUT),
     tap((action: Action) => {
       this.router.navigate(['/']);
+    })
+  );
+
+  @Effect()
+  autoLogin = this.actions$.pipe(
+    ofType(AuthActions.AUTO_LOGIN),
+    map(() => {
+      const userData: {
+        email: string;
+        id: string;
+        _token: string;
+        _tokenExpirationDate: string;
+      } = JSON.parse(localStorage.getItem('userData'));
+      if (!userData) {
+        return { type: 'DUMMY' };
+      }
+
+      const storedUser = new User(
+        userData.email,
+        userData.id,
+        userData._token,
+        new Date(userData._tokenExpirationDate)
+      );
+
+      if (storedUser.token) {
+        return new AuthActions.AuthenticateSuccess({
+          email: userData.email,
+          userId: userData.id,
+          token: userData._token,
+          expirationDate: new Date(userData._tokenExpirationDate),
+        });
+        // const expirationDuration =
+        //   new Date(userData._tokenExpirationDate).getTime() -
+        //   new Date().getTime();
+        // this.autoLogout(expirationDuration);
+      }
+
+      return { type: 'DUMMY' };
+    })
+  );
+
+  @Effect({ dispatch: false })
+  authLogout = this.actions$.pipe(
+    ofType(AuthActions.LOGOUT),
+    tap(() => {
+      localStorage.removeItem('userData');
     })
   );
 
