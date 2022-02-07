@@ -6,14 +6,11 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
-import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 
 import { AlertComponent } from '../shared/alert/alert.component';
 import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
-import { AuthResponseData } from './auth-response-data.model';
-import { AuthService } from './auth.service';
 import * as fromApp from '../store/app.reducer';
 import * as AuthActions from '../auth/store/auth.actions';
 
@@ -33,7 +30,6 @@ export class AuthComponent implements OnInit {
   alertHost: PlaceholderDirective;
 
   constructor(
-    private authService: AuthService,
     private componentFactoryResolver: ComponentFactoryResolver,
     private store: Store<fromApp.AppState>,
   ) {}
@@ -69,13 +65,12 @@ export class AuthComponent implements OnInit {
 
     this.isLoading = true;
 
-    let authObservable: Observable<AuthResponseData>;
-
     if (this.isLoginMode) {
       this.store.dispatch(new AuthActions.LoginStart({ email, password }));
     } else {
-      authObservable = this.authService.signup(email, password);
+      this.store.dispatch(new AuthActions.SignupStart({ email, password }));
     }
+    this.authForm.reset();
   }
 
   onHandleError() {
