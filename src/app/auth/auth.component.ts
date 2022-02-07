@@ -1,6 +1,7 @@
 import {
   Component,
   ComponentFactoryResolver,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -8,6 +9,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 
 import { AlertComponent } from '../shared/alert/alert.component';
 import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
@@ -18,7 +20,7 @@ import * as AuthActions from '../auth/store/auth.actions';
   selector: 'app-auth',
   templateUrl: './auth.component.html',
 })
-export class AuthComponent implements OnInit {
+export class AuthComponent implements OnInit, OnDestroy {
   authForm: FormGroup;
   isLoginMode = true;
   isLoading = false;
@@ -26,12 +28,14 @@ export class AuthComponent implements OnInit {
   success = false;
   error: string = null;
 
+  private storeSub: Subscription;
+
   @ViewChild(PlaceholderDirective, { static: false })
   alertHost: PlaceholderDirective;
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
-    private store: Store<fromApp.AppState>,
+    private store: Store<fromApp.AppState>
   ) {}
 
   ngOnInit() {
@@ -43,13 +47,17 @@ export class AuthComponent implements OnInit {
       ]),
     });
 
-    this.store.select('auth').subscribe(authState => {
+    this.storeSub = this.store.select('auth').subscribe((authState) => {
       this.isLoading = authState.loading;
       this.error = authState.authError;
       if (this.error) {
         this.showErrorAlert(this.error);
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.storeSub.unsubscribe();
   }
 
   onSwitchMode() {
@@ -63,8 +71,6 @@ export class AuthComponent implements OnInit {
     const email = this.authForm.value.email;
     const password = this.authForm.value.password;
 
-    this.isLoading = true;
-
     if (this.isLoginMode) {
       this.store.dispatch(new AuthActions.LoginStart({ email, password }));
     } else {
@@ -74,7 +80,7 @@ export class AuthComponent implements OnInit {
   }
 
   onHandleError() {
-    this.error = null;
+    this.store.dispatch(new AuthActions.ClearError());
   }
 
   private showErrorAlert(message: string) {
@@ -88,12 +94,8 @@ export class AuthComponent implements OnInit {
       alertComponentFactory
     );
     componentRef.instance.message = message;
-    componentRef.instance.close
-      .pipe(
-        take(1),
-      )
-      .subscribe(() => {
-        hostViewContainerRef.clear();
-      });
+    componentRef.instance.close.pipe(take(1)).subscribe(() => {
+      hostViewContainerRef.clear();
+    });
   }
 }

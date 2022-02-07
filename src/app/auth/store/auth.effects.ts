@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { Action } from '@ngrx/store';
 
 import { environment } from 'src/environments/environment';
 import { AuthResponseData } from '../auth-response-data.model';
@@ -54,9 +55,9 @@ export class AuthEffects {
   );
 
   @Effect({ dispatch: false })
-  authSuccess = this.actions$.pipe(
-    ofType(AuthActions.AUTHENTICATE_SUCCESS),
-    tap(() => {
+  authRedirect = this.actions$.pipe(
+    ofType(AuthActions.AUTHENTICATE_SUCCESS, AuthActions.LOGOUT),
+    tap((action: Action) => {
       this.router.navigate(['/']);
     })
   );

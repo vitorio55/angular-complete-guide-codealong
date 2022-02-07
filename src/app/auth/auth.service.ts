@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { Store } from '@ngrx/store';
 
@@ -13,8 +12,7 @@ import * as AuthActions from '../auth/store/auth.actions';
 export class AuthService {
   private tokenExpirationTimer: any;
 
-  constructor(private router: Router,
-              private store: Store<fromApp.AppState>) {}
+  constructor(private store: Store<fromApp.AppState>) {}
 
   autoLogin() {
     const userData: {
@@ -48,22 +46,10 @@ export class AuthService {
     }
   }
 
-  logout() {
-    this.store.dispatch(new AuthActions.Logout());
-    localStorage.removeItem('userData');
-
-    if (this.tokenExpirationTimer) {
-      clearTimeout(this.tokenExpirationTimer);
-    }
-
-    this.tokenExpirationTimer = null;
-    this.router.navigate(['/auth']);
-  }
-
   autoLogout(expirationDuration: number) {
     console.log(`User session expires in (ms): ${ expirationDuration }`);
     this.tokenExpirationTimer = setTimeout(() => {
-      this.logout();
+      this.store.dispatch(new AuthActions.Logout());
     }, expirationDuration);
   }
 }
