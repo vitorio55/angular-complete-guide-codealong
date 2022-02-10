@@ -24,6 +24,7 @@ export const handleAuthentication = (resData: AuthResponseData) => {
     userId: resData.localId,
     token: resData.idToken,
     expirationDate: expirationDate,
+    redirect: true,
   });
 };
 
