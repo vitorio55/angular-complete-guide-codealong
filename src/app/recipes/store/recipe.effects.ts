@@ -19,6 +19,9 @@ export class RecipeEffects {
       return this.http.get<Recipe[]>(this.endpoint).pipe();
     }),
     map((recipes) => {
+      if (!recipes) {
+        return null;
+      }
       return recipes.map((recipe) => {
         return {
           ...recipe,

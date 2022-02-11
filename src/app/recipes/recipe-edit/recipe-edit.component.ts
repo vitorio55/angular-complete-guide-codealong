@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -9,24 +9,26 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { RecipeService } from '../services/recipe.service';
 import * as fromApp from '../../store/app.reducer';
+import * as RecipeActions from '../store/recipe.actions';
 
 @Component({
   selector: 'app-recipe-edit',
   templateUrl: './recipe-edit.component.html',
   styleUrls: ['./recipe-edit.component.css'],
 })
-export class RecipeEditComponent implements OnInit {
+export class RecipeEditComponent implements OnInit, OnDestroy {
   id: number;
   editMode = false;
   recipeForm: FormGroup;
 
+  private storeSub: Subscription;
+
   constructor(
     private route: ActivatedRoute,
-    private recipeService: RecipeService,
     private router: Router,
     private store: Store<fromApp.AppState>
   ) {}
@@ -37,6 +39,12 @@ export class RecipeEditComponent implements OnInit {
       this.editMode = params['id'] != null;
       this.initForm();
     });
+  }
+
+  ngOnDestroy() {
+    if (this.storeSub) {
+      this.storeSub.unsubscribe();
+    }
   }
 
   getFormControls(): AbstractControl[] {
@@ -81,9 +89,14 @@ export class RecipeEditComponent implements OnInit {
     // Since our form has the exact same fields of the Recipe structure, we can pass
     // directly the form value like below. The code above becomes unnecessary.
     if (this.editMode) {
-      this.recipeService.updateRecipe(this.id, this.recipeForm.value);
+      this.store.dispatch(
+        new RecipeActions.UpdateRecipe({
+          index: this.id,
+          newRecipe: this.recipeForm.value,
+        })
+      );
     } else {
-      this.recipeService.addRecipe(this.recipeForm.value);
+      this.store.dispatch(new RecipeActions.AddRecipe(this.recipeForm.value));
     }
     this.onEditCancel();
   }
@@ -114,7 +127,7 @@ export class RecipeEditComponent implements OnInit {
 
   private initForm() {
     if (this.editMode) {
-      this.store
+      this.storeSub = this.store
         .select('recipes')
         .pipe(
           map((recipesState) => {
