@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 import { Store } from '@ngrx/store';
 
@@ -11,10 +12,16 @@ import * as AuthActions from './auth/store/auth.actions';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  constructor(private store: Store<fromApp.AppState>) {}
+  constructor(
+    private store: Store<fromApp.AppState>,
+    @Inject(PLATFORM_ID) private platformId,
+  ) {}
 
   ngOnInit() {
-    console.log('AppComponent executing autoLogin');
-    this.store.dispatch(new AuthActions.AutoLogin());
+    if (isPlatformBrowser(this.platformId)) {
+      console.log('[Browser] AppComponent executing autoLogin');
+      this.store.dispatch(new AuthActions.AutoLogin());
+    }
+    console.log('AppComponent onInit executed');
   }
 }
